@@ -9,6 +9,7 @@ let blackjackGame = {
     'draws': 0,
     'isStand': false,
     'turnsOver': false,
+    'mode': 'single',
 };
 
 const YOU = blackjackGame['you'];
@@ -21,6 +22,7 @@ const lossSound = new Audio('static/sounds/aww.mp3');
 document.querySelector('#blackjack-hit-button').addEventListener('click', backjackHit);
 document.querySelector('#blackjack-deal-button').addEventListener('click', backjackDeal);
 document.querySelector('#blackjack-stand-button').addEventListener('click', dealerLogic);
+document.querySelector('#blackjack-mode').addEventListener('change', changeBackjackMode);
 
 function backjackHit() {
     if (blackjackGame['isStand'] === false) {
@@ -106,16 +108,27 @@ function sleep(ms) {
 async function dealerLogic() {
     blackjackGame['isStand'] = true;
 
-    while (DEALER['score'] < 16 && blackjackGame['isStand'] === true) {
-        let card = randomCard();
-        showCard(card, DEALER);
-        updateScore(card, DEALER);
-        showScore(DEALER);
-        await sleep(1000);
+    if (blackjackGame['mode'] === 'single') {
+        while (DEALER['score'] < 16 && blackjackGame['isStand'] === true) {
+            let card = randomCard();
+            showCard(card, DEALER);
+            updateScore(card, DEALER);
+            showScore(DEALER);
+            await sleep(1000);
+        }
+        blackjackGame['turnsOver'] = true;
+        showResult(computeWinner());
+    } else {
+        if (DEALER['score'] < 16 && blackjackGame['isStand'] === true) {
+            let card = randomCard();
+            showCard(card, DEALER);
+            updateScore(card, DEALER);
+            showScore(DEALER);
+        } else {
+            blackjackGame['turnsOver'] = true;
+            showResult(computeWinner());
+        }
     }
-
-    blackjackGame['turnsOver'] = true;
-    showResult(computeWinner());
 }
 
 // Compute winner and return who just won
@@ -172,4 +185,8 @@ function showResult(winner) {
         document.querySelector("#blackjack-result").textContent = message;
         document.querySelector("#blackjack-result").style.color = messageColor;
     }
+}
+
+function changeBackjackMode() {
+    blackjackGame['mode'] = document.querySelector('#blackjack-mode').value;
 }
